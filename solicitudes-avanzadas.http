@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:8080
+# Reemplazar por un UUID de cliente existente en la base de datos local.
+@clienteId = c35a5bbe-b911-40ab-a4db-46d4360ea1a1
+
+### 1. Crear suite presidencial
+# Esperado: 201 Created y header Location con el recurso creado.
+POST {{baseUrl}}/api/habitaciones/suites
+Content-Type: application/json
+
+{
+  "numero": "P05-501",
+  "precioPorNoche": 350.0,
+  "capacidadMaxima": 2,
+  "jacuzziPrivado": true,
+  "incluyeMayordomo": true
+}
+
+### 2. Consulta polimorfica de habitaciones
+# Esperado: 200 OK; el mismo array debe contener habitaciones ESTANDAR y SUITE,
+# cada una con sus atributos especificos y el campo discriminador "tipo".
+GET {{baseUrl}}/api/habitaciones
+Accept: application/json
+
+### 3. Resumen ejecutivo del cliente
+# Esperado: 200 OK con totalReservasRealizadas, montoTotalGastado y reservasRecientes
+# sin referencia de vuelta al cliente ni ciclos de serializacion.
+GET {{baseUrl}}/api/clientes/{{clienteId}}/resumen
+Accept: application/json
+
+### 4. Actualizacion parcial segura del cliente
+# Esperado: 200 OK; solo cambia nombre. email, activo y penalizaciones deben
+# permanecer sin cambios en la base de datos despues de la peticion.
+PATCH {{baseUrl}}/api/clientes/{{clienteId}}
+Content-Type: application/json
+
+{
+  "nombre": "Nuevo Nombre Modificado"
+}
