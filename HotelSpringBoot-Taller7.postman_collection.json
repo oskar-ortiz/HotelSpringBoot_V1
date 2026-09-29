@@ -1,0 +1,265 @@
+{
+  "info": {
+    "name": "HotelSpringBoot - Taller 7",
+    "description": "Contratos polimorficos, proyecciones anidadas y PATCH seguro.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "clienteId",
+      "value": "c35a5bbe-b911-40ab-a4db-46d4360ea1a1"
+    },
+    {
+      "key": "suiteNumero",
+      "value": "P05-501"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Crear suite presidencial (201 Created)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.variables.set('suiteNumero', 'P05-' + Date.now().toString().slice(-6));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 201 Created', function () { pm.response.to.have.status(201); });",
+              "pm.test('Incluye header Location', function () { pm.expect(pm.response.headers.get('Location')).to.be.a('string').and.not.empty; });",
+              "const body = pm.response.json();",
+              "pm.test('Devuelve una suite con sus atributos', function () { pm.expect(body.tipo).to.eql('SUITE'); pm.expect(body.jacuzziPrivado).to.eql(true); pm.expect(body.incluyeMayordomo).to.eql(true); });",
+              "pm.collectionVariables.set('createdSuiteId', body.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numero\": \"{{suiteNumero}}\",\n  \"precioPorNoche\": 350.0,\n  \"capacidadMaxima\": 2,\n  \"jacuzziPrivado\": true,\n  \"incluyeMayordomo\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/habitaciones/suites",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "habitaciones",
+            "suites"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. Consulta polimorfica de habitaciones (200 OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+              "const rooms = pm.response.json();",
+              "pm.test('Incluye ESTANDAR y SUITE', function () { const types = rooms.map(function (room) { return room.tipo; }); pm.expect(types).to.include('ESTANDAR'); pm.expect(types).to.include('SUITE'); });",
+              "pm.test('Cada subtipo expone sus atributos propios', function () { const standard = rooms.find(function (room) { return room.tipo === 'ESTANDAR'; }); const suite = rooms.find(function (room) { return room.tipo === 'SUITE'; }); pm.expect(standard).to.have.property('camasIndividuales'); pm.expect(suite).to.have.property('jacuzziPrivado'); pm.expect(suite).to.have.property('incluyeMayordomo'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/habitaciones",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "habitaciones"
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Resumen ejecutivo del cliente (200 OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('Calcula totales y reservas', function () { pm.expect(body.totalReservasRealizadas).to.be.a('number'); pm.expect(body.montoTotalGastado).to.be.a('number'); pm.expect(body.reservasRecientes).to.be.an('array').that.is.not.empty; });",
+              "pm.test('No serializa el cliente dentro de sus reservas', function () { body.reservasRecientes.forEach(function (reservation) { pm.expect(reservation).not.to.have.property('cliente'); }); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/clientes/{{clienteId}}/resumen",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "clientes",
+            "{{clienteId}}",
+            "resumen"
+          ]
+        }
+      }
+    },
+    {
+      "name": "3b. GET cliente antes del PATCH (verificacion)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('beforeEmail', body.email);",
+              "pm.collectionVariables.set('beforeActivo', String(body.activo));",
+              "pm.collectionVariables.set('beforePenalizaciones', String(body.penalizaciones));",
+              "pm.test('Tiene los campos protegidos', function () { pm.expect(body).to.have.property('email'); pm.expect(body).to.have.property('activo'); pm.expect(body).to.have.property('penalizaciones'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/clientes/{{clienteId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "clientes",
+            "{{clienteId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Actualizacion parcial segura - PATCH (200 OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('Actualiza el nombre', function () { pm.expect(body.nombre).to.eql('Nuevo Nombre Modificado'); });",
+              "pm.test('La respuesta conserva los campos protegidos', function () { pm.expect(body.email).to.eql(pm.collectionVariables.get('beforeEmail')); pm.expect(String(body.activo)).to.eql(pm.collectionVariables.get('beforeActivo')); pm.expect(String(body.penalizaciones)).to.eql(pm.collectionVariables.get('beforePenalizaciones')); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Nuevo Nombre Modificado\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/clientes/{{clienteId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "clientes",
+            "{{clienteId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4b. GET cliente despues del PATCH (verificacion)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('El nombre persistio', function () { pm.expect(body.nombre).to.eql('Nuevo Nombre Modificado'); });",
+              "pm.test('Email, activo y penalizaciones permanecen intactos', function () { pm.expect(body.email).to.eql(pm.collectionVariables.get('beforeEmail')); pm.expect(String(body.activo)).to.eql(pm.collectionVariables.get('beforeActivo')); pm.expect(String(body.penalizaciones)).to.eql(pm.collectionVariables.get('beforePenalizaciones')); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/clientes/{{clienteId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "clientes",
+            "{{clienteId}}"
+          ]
+        }
+      }
+    }
+  ]
+}

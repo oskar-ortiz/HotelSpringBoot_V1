@@ -22,3 +22,5 @@ El perfil `dev` habilita la consola H2 en `http://localhost:8080/h2-console` y c
 - `PATCH /api/clientes/{id}`: actualiza únicamente `nombre` y `email`, ignorando los campos internos del cliente.
 
 Las cuatro solicitudes del taller están documentadas en `solicitudes-avanzadas.http`. Sustituye `clienteId` por el UUID que imprime el seed del perfil `dev`.
+
+También se incluye la colección `HotelSpringBoot-Taller7.postman_collection.json`, lista para importarse en Postman. Usa `http://localhost:8081` y ejecuta las seis solicitudes en orden; contiene aserciones para los códigos HTTP, la respuesta polimórfica, el resumen sin ciclos y la conservación de email, activo y penalizaciones durante el PATCH.
