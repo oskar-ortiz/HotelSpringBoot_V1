@@ -58,6 +58,21 @@ public class Cliente {
         this.penalizaciones = 0;
     }
 
+    public void actualizarDatos(String nombre, String email) {
+        if (nombre != null) {
+            if (nombre.isBlank()) {
+                throw new IllegalArgumentException("El nombre no puede estar vacio");
+            }
+            this.nombre = nombre;
+        }
+        if (email != null) {
+            if (email.isBlank()) {
+                throw new IllegalArgumentException("El email no puede estar vacio");
+            }
+            this.email = email;
+        }
+    }
+
     public boolean puedeRealizarReservas() {
         return this.activo;
     }
