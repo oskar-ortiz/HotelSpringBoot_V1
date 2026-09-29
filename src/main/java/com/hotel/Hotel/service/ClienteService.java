@@ -1,12 +1,16 @@
 package com.hotel.Hotel.service;
 
 import com.hotel.Hotel.domain.Cliente;
+import com.hotel.Hotel.dto.request.ActualizarClienteRequest;
 import com.hotel.Hotel.dto.request.CrearClienteRequest;
 import com.hotel.Hotel.dto.response.ClienteResponse;
+import com.hotel.Hotel.dto.response.ClienteResumenResponse;
 import com.hotel.Hotel.mapper.ClienteMapper;
 import com.hotel.Hotel.repository.ClienteRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,5 +43,22 @@ public class ClienteService {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + id));
         return clienteMapper.toResponse(cliente);
+    }
+
+    @Transactional(readOnly = true)
+    public ClienteResumenResponse obtenerResumen(UUID id) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Cliente no encontrado con ID: " + id));
+        return clienteMapper.toResumen(cliente);
+    }
+
+    @Transactional
+    public Cliente actualizarParcial(UUID id, ActualizarClienteRequest request) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Cliente no encontrado con ID: " + id));
+        clienteMapper.updateClienteFromDto(request, cliente);
+        return clienteRepository.save(cliente);
     }
 }
