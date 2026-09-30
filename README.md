@@ -14,6 +14,16 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
 El perfil `dev` habilita la consola H2 en `http://localhost:8080/h2-console` y crea de forma idempotente un cliente, una habitación estándar, una suite y dos reservas. Los UUID y los totales se imprimen con el prefijo `[DEV-SEED]` al iniciar.
 
+### Conexión desde DBeaver mientras la aplicación corre
+
+El perfil `dev` usa H2 en modo archivo compartido. En DBeaver selecciona el driver H2 y utiliza la misma URL, reemplazando la ruta relativa por la ruta absoluta de este proyecto:
+
+```text
+jdbc:h2:file:C:/ruta/al/proyecto/HotelSpringBoot/data/hotel-db;AUTO_SERVER=TRUE
+```
+
+Usuario: `sa`. Contraseña: vacía. En H2 2.2.x no se debe combinar `AUTO_SERVER=TRUE` con `DB_CLOSE_ON_EXIT=FALSE`, porque esa combinación es rechazada por el motor; por eso el perfil `dev` conserva únicamente `AUTO_SERVER=TRUE` para permitir la conexión concurrente.
+
 ## Endpoints principales
 
 - `GET /api/habitaciones`: lista habitaciones estándar y suites con el campo discriminador `tipo`.
