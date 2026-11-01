@@ -2,6 +2,51 @@
 
 API REST de reservas de hotel con Spring Boot, JPA, PostgreSQL y MapStruct.
 
+## Portfolio & Author
+
+- Portfolio: https://oskar-ortiz.vercel.app
+- GitHub: https://github.com/oskar-ortiz
+- This backend demonstrates layered application design, domain-driven modeling, and persistence isolation for a hospitality reservation platform.
+
+## Enterprise Architecture Overview
+
+```mermaid
+flowchart TD
+    Client[Client / API Consumer
+HTTP requests] -->|REST over HTTP| Controller[Controller Layer
+ClienteController
+HabitacionController
+ReservaController]
+
+    Controller --> Service[Service Layer
+ClienteService
+HabitacionService
+ReservaService]
+    Service --> Mapper[DTO + MapStruct
+Request / Response mapping]
+    Mapper --> Repository[Repository Layer
+Spring Data JPA
+ClienteRepository
+HabitacionRepository
+ReservaRepository]
+    Repository --> DB[(PostgreSQL
+hotel_reservas_db)]
+
+    subgraph App[Spring Boot Application]
+        Controller
+        Service
+        Mapper
+        Repository
+    end
+```
+
+### Design Principles
+- Clear separation between API exposure, business logic, and persistence.
+- A domain-oriented service layer centralizes rules for reservations, clients, and rooms.
+- DTO mapping prevents leakage of persistence concerns into the HTTP contract.
+- PostgreSQL provides a durable relational backbone for transactional hotel operations.
+- The design emphasizes maintainability, testability, and clean architectural boundaries.
+
 ## Ejecución
 
 El perfil por defecto usa PostgreSQL, configurado en `src/main/resources/application.properties`.
