@@ -1,36 +1,22 @@
 # HotelSpringBoot
 
-API REST de reservas de hotel con Spring Boot, JPA, PostgreSQL y MapStruct.
+API REST para gestión de reservas de hotel implementada con Spring Boot, JPA, PostgreSQL y MapStruct.
 
-## Portfolio & Author
+## Autoría y portafolio
 
 - Portfolio: https://oskar-ortiz.vercel.app
 - GitHub: https://github.com/oskar-ortiz
-- This backend demonstrates layered application design, domain-driven modeling, and persistence isolation for a hospitality reservation platform.
 
-## Enterprise Architecture Overview
+## Visión arquitectónica empresarial
 
 ```mermaid
 flowchart TD
-    Client[Client / API Consumer
-HTTP requests] -->|REST over HTTP| Controller[Controller Layer
-ClienteController
-HabitacionController
-ReservaController]
+    Cliente[Cliente / API Consumer<br/>Solicitudes HTTP] -->|REST over HTTP| Controller[Controller Layer<br/>ClienteController<br/>HabitacionController<br/>ReservaController]
 
-    Controller --> Service[Service Layer
-ClienteService
-HabitacionService
-ReservaService]
-    Service --> Mapper[DTO + MapStruct
-Request / Response mapping]
-    Mapper --> Repository[Repository Layer
-Spring Data JPA
-ClienteRepository
-HabitacionRepository
-ReservaRepository]
-    Repository --> DB[(PostgreSQL
-hotel_reservas_db)]
+    Controller --> Service[Service Layer<br/>ClienteService<br/>HabitacionService<br/>ReservaService]
+    Service --> Mapper[DTO + MapStruct<br/>Mapping de request/response]
+    Mapper --> Repository[Repository Layer<br/>Spring Data JPA<br/>ClienteRepository<br/>HabitacionRepository<br/>ReservaRepository]
+    Repository --> DB[(PostgreSQL<br/>hotel_reservas_db)]
 
     subgraph App[Spring Boot Application]
         Controller
@@ -40,12 +26,12 @@ hotel_reservas_db)]
     end
 ```
 
-### Design Principles
-- Clear separation between API exposure, business logic, and persistence.
-- A domain-oriented service layer centralizes rules for reservations, clients, and rooms.
-- DTO mapping prevents leakage of persistence concerns into the HTTP contract.
-- PostgreSQL provides a durable relational backbone for transactional hotel operations.
-- The design emphasizes maintainability, testability, and clean architectural boundaries.
+### Principios de diseño
+- Separación clara entre API, lógica de negocio y persistencia.
+- La capa de servicio centraliza las reglas de negocio para clientes, habitaciones y reservas.
+- DTO y MapStruct evitan que la capa de acceso a datos contamine el contrato HTTP.
+- PostgreSQL funciona como base relacional duradera para operar transacciones del negocio hotelero.
+- El diseño prioriza mantenibilidad, testabilidad y frontera arquitectónica limpia.
 
 ## Ejecución
 
@@ -78,51 +64,19 @@ Usuario: `sa`. Contraseña: vacía. En H2 2.2.x no se debe combinar `AUTO_SERVER
 
 Las cuatro solicitudes del taller están documentadas en `solicitudes-avanzadas.http`. Sustituye `clienteId` por el UUID que imprime el seed del perfil `dev`.
 
-También se incluye la colección `HotelSpringBoot-Taller7.postman_collection.json`, lista para importarse en Postman. Usa `http://localhost:8081` y ejecuta las seis solicitudes en orden; contiene endpoint de clientes, habitaciones y reservas con JSONs listos para probar.
+También se incluye la colección `HotelSpringBoot-Taller7.postman_collection.json`, lista para importarse en Postman. Usa `http://localhost:8081` y ejecuta las seis solicitudes en orden; contiene JSONs listos para probar clientes, habitaciones y reservas.
 
-## Architecture & System Topology
+## Capas y responsabilidades
 
-```mermaid
-flowchart TD
-    Client[Client / API Consumer
-HTTP requests] -->|REST over HTTP| Controller[Controller Layer
-ClienteController
-HabitacionController
-ReservaController]
+- Capa de entrada: `Controller`
+- Lógica de negocio: `Service`
+- Transformación de contrato: `DTO / MapStruct`
+- Acceso a datos: `Repository`
+- Persistencia: `PostgreSQL`
 
-    Controller --> Service[Service Layer
-ClienteService
-HabitacionService
-ReservaService]
-    Service --> Mapper[DTO + MapStruct
-Request / Response mapping]
-    Mapper --> Repository[Repository Layer
-Spring Data JPA
-ClienteRepository
-HabitacionRepository
-ReservaRepository]
-    Repository --> DB[(PostgreSQL
-hotel_reservas_db)]
+## Requisitos técnicos
 
-    subgraph App[Spring Boot Application]
-        Controller
-        Service
-        Mapper
-        Repository
-    end
-```
-
-### Topology Notes
-- The client interacts with the application through the REST API exposed by the controller layer.
-- Business logic is isolated in the service layer to preserve separation of concerns and maintainability.
-- DTOs and MapStruct centralize the data transformation between the API contract and the domain entities.
-- Persistence is delegated to the repository layer using JPA, keeping the business code independent from the database implementation details.
-- PostgreSQL acts as the durable data store for clients, rooms, and reservations, while the application remains decoupled from persistence concerns.
-
-### Architecture Summary
-- Entry point: `Controller`
-- Business logic: `Service`
-- Contract mapping: `DTO / MapStruct`
-- Data access: `Repository`
-- Persistence layer: `PostgreSQL`
-- Design principle: separation of concerns and clean layered architecture
+- Java 17
+- Maven
+- PostgreSQL (perfil por defecto)
+- H2 (perfil `dev` para desarrollo local)
